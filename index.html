@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcBio | 机密身份认证系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+        }
+
+        .mono { font-family: 'JetBrains+Mono', monospace; }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(75, 85, 99, 0.3);
+        }
+
+        /* 扫描动画 */
+        @keyframes scan-vertical {
+            0% { top: 0%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scanner-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #10b981;
+            box-shadow: 0 0 25px #10b981;
+            animation: scan-vertical 3s infinite ease-in-out;
+            z-index: 20;
+        }
+
+        .mxe-glow {
+            animation: mxe-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes mxe-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            filter: grayscale(1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-12 px-6">
+
+    <!-- Header -->
+    <header class="w-full max-w-5xl flex justify-between items-center mb-16">
+        <div class="flex items-center gap-4">
+            <div class="bg-emerald-600 p-2.5 rounded-2xl shadow-xl shadow-emerald-500/20">
+                <i class="fas fa-fingerprint text-white text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tight text-white uppercase italic">ArcBio</h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">Confidential Identity Layer</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-end text-right">
+            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Network Authority</span>
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-bold text-slate-300">Arcium Devnet Active</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+        
+        <!-- Left: Action Area -->
+        <div class="lg:col-span-5 space-y-8">
+            <div class="glass-panel rounded-[2.5rem] p-10 space-y-8 shadow-2xl relative overflow-hidden border-t-4 border-emerald-500">
+                <div class="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/5 blur-[80px] rounded-full"></div>
+                
+                <div class="text-center space-y-2">
+                    <h2 class="text-xl font-bold text-white uppercase tracking-tight">身份验证令牌</h2>
+                    <p class="text-xs text-slate-500 font-medium italic">特征码在本地通过 x25519 加密</p>
+                </div>
+
+                <!-- Scanner UI -->
+                <div class="relative w-48 h-64 mx-auto bg-slate-950 rounded-3xl border border-slate-800 flex items-center justify-center group overflow-hidden">
+                    <i id="bioIcon" class="fas fa-fingerprint text-slate-900 text-8xl group-hover:text-emerald-500/10 transition duration-1000"></i>
+                    <div id="scannerBar" class="hidden scanner-line"></div>
+                </div>
+
+                <div class="space-y-4">
+                    <button id="authBtn" class="w-full bg-white text-slate-950 font-black py-5 rounded-2xl hover:bg-emerald-50 transition active:scale-[0.95] flex items-center justify-center gap-3 shadow-xl mxe-glow">
+                        <i class="fas fa-shield-check"></i> START AUTHENTICATION
+                    </button>
+                    <p class="text-[9px] text-center text-slate-600 uppercase tracking-[0.2em] font-black">Vendor-Agnostic Privacy Shield</p>
+                </div>
+            </div>
+
+            <div class="bg-emerald-900/10 border border-emerald-500/20 p-6 rounded-3xl flex items-start gap-4">
+                <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center flex-shrink-0 text-emerald-400">
+                    <i class="fas fa-microchip text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black text-emerald-400 uppercase tracking-widest mb-1">FHE Data Portability</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        ArcBio 解决了“生物信息泄露即终身泄露”的隐患。您的指纹特征永远以密文态在 Arcium MXE 中运行，即便节点被攻破也无法还原原始生物特征。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Telemetry Area -->
+        <div class="lg:col-span-7 flex flex-col">
+            <div id="displayPanel" class="glass-panel rounded-[2.5rem] p-10 flex-1 flex flex-col relative overflow-hidden min-h-[500px]">
+                
+                <!-- Idle State -->
+                <div id="idleState" class="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                    <div class="w-24 h-24 rounded-full border-2 border-slate-800 flex items-center justify-center">
+                        <i class="fas fa-link-slash text-slate-800 text-3xl animate-pulse"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="font-bold text-slate-400 uppercase tracking-widest text-sm">Waiting for Enrollment Scan</h3>
+                        <p class="text-xs text-slate-600 max-w-xs mx-auto">请点击左侧按钮模拟本地特征提取与密文提升过程。</p>
+                    </div>
+                </div>
+
+                <!-- Processing UI -->
+                <div id="processingState" class="hidden flex-1 flex flex-col items-center justify-center space-y-10">
+                    <div class="flex items-center gap-8 justify-center">
+                        <div class="w-16 h-16 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl animate-pulse text-white text-3xl">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="flex flex-col items-center gap-2">
+                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Equality Test</span>
+                            <div class="h-[2px] w-28 bg-gradient-to-r from-emerald-600 via-white to-slate-800"></div>
+                            <span class="text-[10px] font-black text-slate-600 uppercase tracking-widest mono">FHE-Multiplexer</span>
+                        </div>
+                        <i class="fas fa-lock text-slate-700 text-3xl"></i>
+                    </div>
+                    <div class="text-center space-y-4">
+                        <h3 class="font-black text-emerald-400 uppercase tracking-[0.3em] text-sm animate-pulse">MXE 同态特征比对中...</h3>
+                        <div class="bg-slate-950/80 px-8 py-3 rounded-full border border-slate-800 shadow-inner">
+                            <p class="text-[10px] font-mono text-emerald-300 tracking-wider" id="statusMsg">Comparing Attempt vs Template...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result State -->
+                <div id="resultState" class="hidden flex-1 flex flex-col items-center justify-center text-center space-y-8">
+                    <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+                        <i class="fas fa-user-check text-emerald-500 text-4xl"></i>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-2xl font-black text-white tracking-tight uppercase">认证通过 (Authenticated)</h3>
+                        <p class="text-xs text-slate-400 max-w-xs mx-auto">您的身份已通过 Arcium MXE 验证。已签发机密授权凭证。</p>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mono text-[9px] text-emerald-400 uppercase tracking-tighter">
+                        AUTH_SIG: 0x2yGWJCB...WWw | VERIFIED: TRUE
+                    </div>
+                    <button onclick="resetUI()" class="text-[10px] font-black text-slate-600 hover:text-white uppercase tracking-[0.4em] transition pt-8 border-b border-transparent hover:border-slate-500 pb-1">Reset identity gate</button>
+                </div>
+
+                <!-- Log Footer -->
+                <div class="mt-auto pt-8 border-t border-slate-800/50">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                            <i class="fas fa-terminal"></i> MXE Telemetry
+                        </span>
+                        <span class="text-[9px] mono text-slate-600 italic">Program: FHELxP...buni</span>
+                    </div>
+                    <div id="liveLogs" class="space-y-2 h-24 overflow-y-auto custom-scrollbar mono text-[10px] text-slate-600">
+                        <!-- Logs inject -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-16 text-slate-800 text-[10px] uppercase tracking-[0.5em] font-black italic">
+        ArcBio Confidential Identity Protocol &copy; 2026 | Built for the Genesis
+    </footer>
+
+    <script>
+        const authBtn = document.getElementById('authBtn');
+        const scannerBar = document.getElementById('scannerBar');
+        const bioIcon = document.getElementById('bioIcon');
+        const idleState = document.getElementById('idleState');
+        const processingState = document.getElementById('processingState');
+        const resultState = document.getElementById('resultState');
+        const statusMsg = document.getElementById('statusMsg');
+        const liveLogs = document.getElementById('liveLogs');
+
+        const mxePhases = [
+            "Sharding entropy for x25519 session...",
+            "Lifting Bio-Feature to SharedEncryptedStruct...",
+            "Encrypting 'Template' within Arcis circuit...",
+            "Executing verify_biometric Equality Test...",
+            "Routing multiplexer to match outcome...",
+            "Sharding authentication proof across nodes...",
+            "Broadcasting verified callback to Solana..."
+        ];
+
+        function addLiveLog(text, color = 'text-slate-600') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = `${color} border-l-2 border-transparent pl-2`;
+            entry.innerHTML = `<span class="text-slate-800 mr-2">[${time}]</span> ${text}`;
+            liveLogs.prepend(entry);
+        }
+
+        authBtn.addEventListener('click', () => {
+            authBtn.disabled = true;
+            scannerBar.classList.remove('hidden');
+            bioIcon.classList.remove('text-slate-900');
+            bioIcon.classList.add('text-emerald-500/40');
+            
+            idleState.classList.add('hidden');
+            resultState.classList.add('hidden');
+            processingState.classList.remove('hidden');
+
+            addLiveLog("Local Scan Initiated. Encrypting feature vector...", "text-emerald-500 font-bold");
+
+            let phase = 0;
+            const logInterval = setInterval(() => {
+                statusMsg.innerText = mxePhases[phase];
+                addLiveLog(`[MXE] ${mxePhases[phase]}`);
+                phase++;
+                if (phase >= mxePhases.length) clearInterval(logInterval);
+            }, 750);
+
+            setTimeout(() => {
+                processingState.classList.add('hidden');
+                resultState.classList.remove('hidden');
+                scannerBar.classList.add('hidden');
+                bioIcon.classList.remove('text-emerald-500/40');
+                bioIcon.classList.add('text-emerald-500');
+                
+                addLiveLog("🎉 [SUCCESS] Biometric match confirmed via Program FHELxP...", "text-green-500 font-black");
+                authBtn.disabled = false;
+            }, 6000);
+        });
+
+        function resetUI() {
+            resultState.classList.add('hidden');
+            idleState.classList.remove('hidden');
+            bioIcon.className = "fas fa-fingerprint text-slate-900 text-8xl group-hover:text-emerald-500/10 transition duration-1000";
+            addLiveLog("Identity link reset. Gate closed.");
+        }
+
+        addLiveLog("ArcBio Identity Engine initialized.");
+        addLiveLog("Connected to Arcium MXE Cluster 456.");
+    </script>
+</body>
+</html>
