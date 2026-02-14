@@ -1,4 +1,4 @@
-# ArcBio: Vendor-Agnostic Confidential Biometric Authentication
+# ArcBio: Vendor-Agnostic Confidential Biometric Authentication 👁️
 
 ## 🧬 Overview
 
@@ -8,29 +8,51 @@ Current biometric systems (FaceID, TouchID) are either locked within specific ha
 
 Apps receive only a "match/no-match" signal, ensuring the user's raw biological features remain mathematically unobservable to any observer or node operator.
 
-## 🚀 Live Deployment Status (Devnet)
+## 🚀 Live Deployment Status (Devnet v0.8.3)
 
 The protocol is fully operational and verified on the Arcium Devnet.
 
-- **MXE Address:** `2yGWJCB5yMA7wTm31T8CX5xTVX7ESp9YpunR68C4sWWw`
-- **MXE Program ID:** `FHELxPeKoWRLbopi2ZXqfYFd1rfcL7Zcj9moQKXMbuni`
-- **Computation Definition:** `GxzuhC3uXPJcCdykYehhzZuzxs9m12JvHipcWuf3Ntjg`
-- **Status:** `Active`
+### 🖥️ Interactive Demo
+
+[Launch ArcBio Terminal](https://silent-builder-x.github.io/ArcBio/)
 
 ## 🧠 Core Innovation: "Silent Biometrics"
 
 ArcBio implements a universal authentication primitive:
 
-- **Encrypted Enrollment:** Biometric feature vectors are encrypted locally using x25519 before being committed as state.
-- **Homomorphic Equality Test:** The Arcis circuit executes a constant-time equality check between the "Attempt" and "Template" ciphertexts using optimized multiplexers.
-- **Zero-Trust Settlement:** Final verification is finalized via Arcium's threshold signature process and committed to the Solana ledger via verified callbacks.
+1. **Encrypted Enrollment:** Biometric feature vectors are encrypted locally using x25519 before being committed as state.
+2. **Homomorphic Equality Test:** The Arcis circuit executes a constant-time equality check between the "Attempt" and "Template" ciphertexts using optimized multiplexers.
+3. **Zero-Trust Settlement:** Final verification is finalized via Arcium's threshold signature process and committed to the Solana ledger via verified callbacks.
 
-## 🛠 Build & Implementation
+## 🛠 Architecture
+
+```
+graph LR
+    A[User Device] -- 1. Encrypt Bio-Vector --> B(Solana Program)
+    B -- 2. Queue Auth Request --> C{Arcium MXE Cluster}
+    C -- 3. Homomorphic Match --> C
+    C -- 4. Generate Proof --> B
+    B -- 5. Emit Auth Token --> A
+
+```
+
+## ⚙️ Build & Implementation
+
+### Prerequisites
+
+- Arcium CLI `0.8.3`
+
+### 1. Build Circuit
 
 ```
 # Compile Arcis circuits and Anchor program
 arcium build
 
+```
+
+### 2. Deploy to Cluster
+
+```
 # Deploy to Cluster 456
 arcium deploy --cluster-offset 456 --recovery-set-size 4 --keypair-path ~/.config/solana/id.json -u d
 

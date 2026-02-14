@@ -15,7 +15,7 @@
             color: #f8fafc;
         }
 
-        .mono { font-family: 'JetBrains+Mono', monospace; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
 
         .glass-panel {
             background: rgba(17, 24, 39, 0.7);
@@ -59,7 +59,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-12 px-6">
+<body class="min-h-screen flex flex-col items-center py-12 px-6 bg-[url('https://assets.arcium.com/grid.svg')] bg-fixed bg-cover">
 
     <!-- Header -->
     <header class="w-full max-w-5xl flex justify-between items-center mb-16">
@@ -157,7 +157,7 @@
                 </div>
 
                 <!-- Result State -->
-                <div id="resultState" class="hidden flex-1 flex flex-col items-center justify-center text-center space-y-8">
+                <div id="resultState" class="hidden flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in duration-500">
                     <div class="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center border-2 border-emerald-500 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                         <i class="fas fa-user-check text-emerald-500 text-4xl"></i>
                     </div>
@@ -254,7 +254,9 @@
         function resetUI() {
             resultState.classList.add('hidden');
             idleState.classList.remove('hidden');
+            // Reset Icon
             bioIcon.className = "fas fa-fingerprint text-slate-900 text-8xl group-hover:text-emerald-500/10 transition duration-1000";
+            
             addLiveLog("Identity link reset. Gate closed.");
         }
 
