@@ -8,7 +8,7 @@ Current biometric systems (FaceID, TouchID) are either locked within specific ha
 
 Apps receive only a "match/no-match" signal, ensuring the user's raw biological features remain mathematically unobservable to any observer or node operator.
 
-## 🚀 Live Deployment Status (Devnet v0.8.3)
+## 🚀 Live Deployment Status (Devnet v0.9.2)
 
 The protocol is fully operational and verified on the Arcium Devnet.
 
