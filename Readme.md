@@ -40,7 +40,7 @@ graph LR
 
 ### Prerequisites
 
-- Arcium CLI `0.8.3`
+- Arcium CLI `0.9.2`
 
 ### 1. Build Circuit
 
